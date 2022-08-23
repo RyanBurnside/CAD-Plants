@@ -38,17 +38,18 @@
 
 
 ;; Produce a new child branch
-(defun new-child-branch (parent angle-delta length-multiplier)
+(defun new-child-branch (parent angle-delta length-multiplier / pt)
   (setq pt (get-attr 'pt2 parent))
   (make-line pt
-    (polar pt
-	   (+ (get-attr 'angle parent) angle-delta)
-	   (* (get-attr 'length parent) length-multiplier))))
+             (polar pt
+                    (+ (get-attr 'angle parent) angle-delta)
+                    (* (get-attr 'length parent) length-multiplier))))
     
 
 ;; Draws a tree
 ;; Example (tree (list (make-line '(0 0) '(0 10))) 7)
-(defun tree (line-list iterations)
+(defun tree (line-list iterations
+	         / old-generation new-generation new-children)
   (setq old-generation line-list)
   (setq new-generation '())
 
@@ -56,27 +57,25 @@
     ;; Draw initial list
     (progn
       (foreach l line-list
-	(draw-line l))
+        (draw-line l))
 
       ;; Make children lines and draw them
       (repeat iterations
 	(foreach l old-generation
-	  (setq	child-a (new-child-branch l 0.0 0.55)
-		child-b (new-child-branch l 0.785 0.4)
-		child-c (new-child-branch l -0.785 0.4))
-
-	  (setq	new-generation
-		 (append new-generation (list (draw-and-return-line child-a)
-					      (draw-and-return-line child-b)
-					      (draw-and-return-line child-c)))))
+	  (setq new-children (mapcar (function draw-and-return-line)
+                                 (list (new-child-branch l 0.0 0.55)
+                                       (new-child-branch l 0.785 0.4)
+                                       (new-child-branch l -0.785 0.4)))
+            new-generation (append new-generation new-children)))
+    ;; Each branch made children, loop and set the new generation to old
 	(setq old-generation new-generation
 	      new-generation '())))))
 
 ;; Prompts a user for a tree trunk and fills in the rest
-;; I assume 7 iterations here but it cold be made variable.
-(defun prompt-tree ()
+;; I assume 7 iterations here but it could be made variable.
+(defun prompt-tree (/ base-point crown-point)
   (setq base-point (force-2d (getpoint "Pick trunk base"))
-	crown-point (force-2d (getpoint base-point "Pick crown base")))
+        crown-point (force-2d (getpoint base-point "Pick crown base")))
   (tree (list (make-line base-point crown-point)) 7))
 
 
