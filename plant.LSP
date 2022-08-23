@@ -73,7 +73,7 @@
 
 ;; Prompts a user for a tree trunk and fills in the rest
 ;; I assume 7 iterations here but it could be made variable.
-(defun prompt-tree (/ base-point crown-point)
+(defun c:prompt-tree (/ base-point crown-point)
   (setq base-point (force-2d (getpoint "Pick trunk base"))
         crown-point (force-2d (getpoint base-point "Pick crown base")))
   (tree (list (make-line base-point crown-point)) 7))
